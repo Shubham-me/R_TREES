@@ -82,7 +82,7 @@ void search(node *N, node *Q, node_list **L)
     {
         if (overlap((N->children)[i], Q))
         {
-            search(N, Q, L);
+            search((N->children)[i], Q, L);
         }
     }
     return;
@@ -313,7 +313,6 @@ double dist(node *Q1, node *Q2, int type)
     }
     return 0;
 }
-
 double mindist(node *N, node *Q, int type)
 {
     node *Q1 = create_node();
@@ -388,6 +387,27 @@ double minmaxdist(node *N, node *Q, int type)
     delete Q2;
     return Dist;
 }
+/*
+void Del(node* N,node* Q,node_list** L)
+{
+    if(N -> type == 1)
+    {
+        for(int i = 0; i < N -> n; i++)
+        {
+            if()
+        }
+    }
+    return;
+}
+void delete_main(node* N,node* Q)
+{
+    node_list* L = new node_list[1];
+    L -> next = NULL;
+    node_list* temp3 = L;
+    Del(N,Q,&temp3);
+}
+*/
+
 void Nearest_Neighbour(node *N, node *Q, double *Dist, node **NN, int type)
 {
     if (N->type == 1)
@@ -460,7 +480,7 @@ void dfs(node *N)
     }
     return;
 }
-void Brute(node **P,node *Q, int n, int t)
+void Brute(node **P, node *Q, int n, int t)
 {
     int N = 0;
     double Dist = dist(P[0], Q, t);
@@ -474,23 +494,22 @@ void Brute(node **P,node *Q, int n, int t)
         }
     }
     cout << Dist << ": ";
-    for(int j = 0; j < D; j++)
+    for (int j = 0; j < D; j++)
     {
-        cout << P[N] -> L << " ";
+        cout << (P[N]->L)[j] << " ";
     }
     cout << endl;
 }
-int main()
+node* input(int n,node* P[])
 {
-    int n = 200;
-    node *P[n];
     node *N = create_node();
     N->type = 1;
-    double *Q = new double[D];
+    double Q[n];
     for (int j = 0; j < D; j++)
     {
-        // Q[j] = (-20) + (rand() % 10);
-        cin >> Q[j];
+        double f = (double)rand() / RAND_MAX;
+        Q[j] = (-10 + f * (20));
+        // cin >> Q[j];
     }
     for (int i = 0; i < D; i++)
     {
@@ -511,8 +530,10 @@ int main()
     {
         for (int j = 0; j < D; j++)
         {
-            // Q[j] = (-20) + (rand() % 10);
-            cin >> Q[j];
+            double f = (double)rand() / RAND_MAX;
+            Q[j] = (-10 + f * (20));
+            // Q[j] = (-10) + (rand() % 21);
+            //  cin >> Q[j];
         }
         node *temp = create_node();
         temp->type = 0;
@@ -525,30 +546,107 @@ int main()
         }
         N = insert_main(N, temp);
     }
-    // dfs(N);
-    // cout << "##########################" << endl;
-    node *NN = create_node();
-    NN->type = 0;
-    int k;
-    k = 10;
-    node *Q1 = create_node();
-    double Dist;
-    Q1->type = 0;
+    return N;
+}
+void algo_output(node* A[],node* NN,int k,node* N,int t)
+{
+    cout << "Algorithm output" << endl << endl;
     for (int i = 0; i < k; i++)
     {
-        for (int j = 0; j < D; j++)
-        {
-            // Q[j] = (-20) + (rand() % 10);
-            cin >> Q[j];
-            (Q1->L)[j] = (Q1->R)[j] = Q[j];
-        }
-        Dist = 30000;
-        dfs(Q1);
-        Nearest_Neighbour(N, Q1, &Dist, &NN, 1);
-        Brute(P,Q1,n,1);
+        double Dist = 30000;
+        Nearest_Neighbour(N, A[i], &Dist, &NN, t);
         cout << Dist << ": ";
         dfs(NN);
     }
+    cout << endl << endl;
+}
+void brute_output(node* A[],node* P[],int k,int n,int t)
+{
+    cout << "Brute force output" << endl << endl;
+    for (int i = 0; i < k; i++)
+    {
+        Brute(P, A[i], n, t);
+    }
+    cout << endl << endl;
+}
+void rectangular_query_output(node* A[],int k,node* N,double delta,int t)
+{
+    node *print_Q;
+    node *Q1 = create_node(); Q1 -> type = 0;
+    cout << "Rectangular Query " << endl << endl;
+    for (int i = 0; i < k; i++)
+    {
+        node_list *L = new node_list[1];
+        L -> next = NULL;
+        print_Q = A[i];
+        for (int j = 0; j < D; j++)
+        {
+            double var = (print_Q->L)[j];
+            (Q1->L)[j] = var - delta;
+            (Q1->R)[j] = var + delta;
+        }
+        node_list *temp3 = L;
+        search(N, Q1, &temp3);
+        if(L -> next == NULL)
+        {
+            cout << "NO POINTS FOUND" << endl;
+            continue;
+        }
+        node_list *temp4 = L;
+        node *nearest = create_node();
+        nearest->type = 0;
+        double Dist_min = 50000;
+        while (temp4->next != NULL)
+        {
+            double Dist = dist(temp4->N, print_Q, t);
+            //cout << Dist << ": ";
+            if (Dist < Dist_min)
+            {
+                Dist_min = Dist;
+                nearest = temp4->N;
+            }
+            //dfs(temp4->N);
+            temp4 = temp4->next;
+        }
+        cout << Dist_min << ": ";
+        dfs(nearest);
+        delete(L);
+    }
+    delete Q1;
+    cout << endl << endl;
+}
+int main()
+{
+    int n = 2000, k = 10, t = 2;
+    double delta = 7;
+    node *P[n];
+    double Q[D];
+    node* N = input(n,P);
+
+    node *NN = create_node(); NN->type = 0;
+    double Dist;
+    
+
+    node **A = new node *[k];
+    cout << "Query Points" << endl << endl;
+    for (int i = 0; i < k; i++)
+    {
+        A[i] = create_node();
+        A[i]->type = 0;
+        for (int j = 0; j < D; j++)
+        {
+            double f = (double)rand() / RAND_MAX;
+            Q[j] = (-10 + f * (20));
+            // cin >> Q[j];
+            (A[i]->L)[j] = (A[i]->R)[j] = Q[j];
+        }
+        dfs(A[i]);
+    }
+    cout << endl << endl;
+
+    algo_output(A,NN,k,N,t);
+    brute_output(A,P,k,n,t);
+    rectangular_query_output(A,k,N,delta,t);
 
     return 0;
 }
