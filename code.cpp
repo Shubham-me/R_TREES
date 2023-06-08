@@ -387,27 +387,6 @@ double minmaxdist(node *N, node *Q, int type)
     delete Q2;
     return Dist;
 }
-/*
-void Del(node* N,node* Q,node_list** L)
-{
-    if(N -> type == 1)
-    {
-        for(int i = 0; i < N -> n; i++)
-        {
-            if()
-        }
-    }
-    return;
-}
-void delete_main(node* N,node* Q)
-{
-    node_list* L = new node_list[1];
-    L -> next = NULL;
-    node_list* temp3 = L;
-    Del(N,Q,&temp3);
-}
-*/
-
 void Nearest_Neighbour(node *N, node *Q, double *Dist, node **NN, int type)
 {
     if (N->type == 1)
