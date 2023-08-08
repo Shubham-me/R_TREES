@@ -90,7 +90,7 @@ public:
         return areaNew - area;
     }
 
-    // splits the MBR into two sub-MBRs, while trying to minimize their sum of areas
+    // splits the MBR into two sub-MBRs.
     node *split() {
         // For testing
         // Shift half of them to a new node
